@@ -1,6 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,20 +58,10 @@ void next_step(FILD* fild)
 			process_cell(fild, i, j);
 		}
 	}
-
-	//printFild(fild);
-	//Sleep(500);
-	//system("@cls||clear");
-
 	int** tmp = fild->state;
 	(fild->state) = fild->new_state;
 	fild->new_state = tmp;
 }
-
-//int trS(int a)
-//{
-//  return  (a & ls) + ((a >> 1) & ls) + ((a >> 2) & ls);
-//}
 
 long long getChL(unsigned long long block1, unsigned long long block2, unsigned long long block3)
 {
@@ -148,6 +135,7 @@ inline void process_blockL(FILD* fild, int b1, int b2, int b3, int j, int start,
 	process_cell(fild, b2, start);
 	process_cell(fild, b2, end);
 }
+
 void nextStepL(FILD* fild)
 {
 	for (int j = 0; j < fild->size_x / 64; j++)
@@ -179,9 +167,6 @@ void nextStepL(FILD* fild)
 		process_blockL(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 64, fild->size_x - 1);
 	}
 
-	// printFild(fild);
-	//Sleep(500);
-	//system("@cls||clear");
 	int** tmp = fild->state;
 	(fild->state) = fild->new_state;
 	fild->new_state = tmp;
@@ -218,9 +203,6 @@ void nextStepInt(FILD* fild)
 		process_block(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 32, fild->size_x - 1);
 	}
 
-	// printFild(fild);
-	//Sleep(500);
-	//system("@cls||clear");
 	int** tmp = fild->state;
 	(fild->state) = fild->new_state;
 	fild->new_state = tmp;
@@ -250,42 +232,4 @@ int test(FILD* fild1, FILD* fild2, void (*step1) (FILD*), void (*step2) (FILD*),
 		}
 	}
 	return 1;
-}
-
-int main()
-{
-	struct dirent* de;  // Pointer for directory entry
-
-	// opendir() returns a pointer of DIR type.
-	DIR* dr = opendir("C:\\Users\\Leon\\Desktop\\tests");
-
-	if (dr == NULL)  // opendir returns NULL if couldn't open directory
-	{
-		printf("Could not open current directory");
-		return 0;
-	}
-
-	// Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html
-	// for readdir()
-	while ((de = readdir(dr)) != NULL) {
-		char s[80] = "C:\\Users\\Leon\\Desktop\\tests\\";
-		if (strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, ".."))
-		{
-			strcat(s, de->d_name);
-			FILD* fild = loadFild(s, 64);
-			FILD* fild1 = loadFild(s, 64);
-			printf("%d\n ", test(fild, fild1, nextStepL, next_step, 1000, 64));
-
-			freeFild(fild);
-			freeFild(fild1);
-		}
-	}
-	closedir(dr);
-
-	// printf("%d ", test(fild, fild1, nextStepInt, next_step, 50));
-
-	printf("Hello world!\n");
-
-	Sleep(1000);
-	return 0;
 }
