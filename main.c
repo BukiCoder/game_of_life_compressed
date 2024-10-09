@@ -212,12 +212,8 @@ int test(FILD* fild1, FILD* fild2, void (*step1) (FILD*), void (*step2) (FILD*),
 {
 	for (int i = 0; i < rounds_count; i++)
 	{
-		saveFild("f1.txt", fild1);
 		step1(fild1);
-		saveFild("f1s.txt", fild1);
-		saveFild("f2.txt", fild2);
 		step2(fild2);
-		saveFild("f2s.txt", fild2);
 		for (int j = 0; j < fild1->size_y; j++)
 		{
 			if (memcmp(fild1->state[j], fild2->state[j], (fild1->size_x / align * 8)) != 0)
