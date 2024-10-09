@@ -227,5 +227,3 @@ int test(GRID* grid1, GRID* grid2, void (*step1) (GRID*), void (*step2) (GRID*),
     }
     return 1;
 }
-
-int main(){}
