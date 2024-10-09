@@ -11,16 +11,6 @@
 #define s2L 0b0100100100100100100100100100100100100100100100100100100100100100
 #define s3L 0b0110110110110110110110110110110110110110110110110110110110110110
 
-int get(int** arr, int y, int x)
-{
-    return (arr[y][x / 32] >> (31 - (x % 32))) & 0x00000001;
-}
-
-int set(int** arr, int val, int y, int x)
-{
-    arr[y][x / 32] = (arr[y][x / 32] & (~((1) << (31 -  (x% 3 2)))))  + ((val) << (31 - (x % 32)));
-}
-
 void process_cell(FILD* fild, int i, int j)
 {
     int iu = (i + 1) % fild->size_y;
