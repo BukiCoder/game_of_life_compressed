@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include "fild.h"
+#include "grid.h"
 
 #define ls 0b00100100100100100100100100100100
 #define s2 0b01001001001001001001001001001001
@@ -11,53 +11,53 @@
 #define s2L 0b0100100100100100100100100100100100100100100100100100100100100100
 #define s3L 0b0110110110110110110110110110110110110110110110110110110110110110
 
-void process_cell(FILD* fild, int i, int j)
+void process_cell(GRID* grid, int i, int j)
 {
-    int iu = (i + 1) % fild->size_y;
-    int id = (i - 1 + fild->size_y) % fild->size_y;
+    int iu = (i + 1) % grid->size_y;
+    int id = (i - 1 + grid->size_y) % grid->size_y;
 
-    int ju = (j + 1) % fild->size_x;
-    int jd = (j - 1 + fild->size_x) % fild->size_x;
+    int ju = (j + 1) % grid->size_x;
+    int jd = (j - 1 + grid->size_x) % grid->size_x;
 
-    int L = get(fild->state, iu, j);
-    int R = get(fild->state, id, j);
+    int L = get(grid->state, iu, j);
+    int R = get(grid->state, id, j);
 
-    int LD = get(fild->state, i, ju);
-    int D = get(fild->state, id, ju);
-    int RD = get(fild->state, iu, ju);
+    int LD = get(grid->state, i, ju);
+    int D = get(grid->state, id, ju);
+    int RD = get(grid->state, iu, ju);
 
-    int LU = get(fild->state, i, jd);
-    int U = get(fild->state, id, jd);
-    int RU = get(fild->state, iu, jd);
+    int LU = get(grid->state, i, jd);
+    int U = get(grid->state, id, jd);
+    int RU = get(grid->state, iu, jd);
 
     int sum = L + R + LD + D + RD + LU + U + RU;
 
-    if (sum == 3 && get(fild->state, i, j) == 0)
+    if (sum == 3 && get(grid->state, i, j) == 0)
     {
-        set(fild->new_state, 1, i, j);
+        set(grid->new_state, 1, i, j);
     }
-    else if (get(fild->state, i, j) == 1 && !(sum == 2 || sum == 3))
+    else if (get(grid->state, i, j) == 1 && !(sum == 2 || sum == 3))
     {
-        set(fild->new_state, 0, i, j);
+        set(grid->new_state, 0, i, j);
     }
     else
     {
-        set(fild->new_state, get(fild->state, i, j), i, j);
+        set(grid->new_state, get(grid->state, i, j), i, j);
     }
 }
 
-void next_step(FILD* fild)
+void next_step(GRID* grid)
 {
-    for (int i = 0; i < fild->size_y; i++)
+    for (int i = 0; i < grid->size_y; i++)
     {
-        for (int j = 0; j < fild->size_x; j++)
+        for (int j = 0; j < grid->size_x; j++)
         {
-            process_cell(fild, i, j);
+            process_cell(grid, i, j);
         }
     }
-    int** tmp = fild->state;
-    (fild->state) = fild->new_state;
-    fild->new_state = tmp;
+    int** tmp = grid->state;
+    (grid->state) = grid->new_state;
+    grid->new_state = tmp;
 }
 
 long long getChL(unsigned long long block1, unsigned long long block2, unsigned long long block3)
@@ -96,11 +96,11 @@ int getCh(int block1, int block2, int block3)
     return ((is3 & ((~(block2 >> 1)))) | ((~(is2 | is3)) & ((block2 >> 1)))) & ls;
 }
 
-inline void process_block(FILD* fild, int b1, int b2, int b3, int j, int start, int end)
+inline void process_block(GRID* grid, int b1, int b2, int b3, int j, int start, int end)
 {
-    int block1 = fild->state[b1][j];
-    int block2 = fild->state[b2][j];
-    int block3 = fild->state[b3][j];
+    int block1 = grid->state[b1][j];
+    int block2 = grid->state[b2][j];
+    int block3 = grid->state[b3][j];
 
     int a1 = getCh(block1, block2, block3) << 1;
     int a2 = getCh(block1 << 1, block2 << 1, block3 << 1);
@@ -108,18 +108,18 @@ inline void process_block(FILD* fild, int b1, int b2, int b3, int j, int start, 
 
     int change = a1 ^ a2 ^ a3;
 
-    fild->new_state[b2][j] = fild->state[b2][j] ^ change;
+    grid->new_state[b2][j] = grid->state[b2][j] ^ change;
 
-    process_cell(fild, b2, start);
-    process_cell(fild, b2, end);
+    process_cell(grid, b2, start);
+    process_cell(grid, b2, end);
 }
 
-inline void process_blockL(FILD* fild, int b1, int b2, int b3, int j, int start, int end)
+inline void process_blockL(GRID* grid, int b1, int b2, int b3, int j, int start, int end)
 {
-    int kk = ((fild->state[b1]))[j];
-    long long block1 = ((long long*)(fild->state[b1]))[j];
-    long long block2 = ((long long*)fild->state[b2])[j];
-    long long block3 = ((long long*)fild->state[b3])[j];
+    int kk = ((grid->state[b1]))[j];
+    long long block1 = ((long long*)(grid->state[b1]))[j];
+    long long block2 = ((long long*)grid->state[b2])[j];
+    long long block3 = ((long long*)grid->state[b3])[j];
 
     long long a1 = getChL(block1, block2, block3) << 1;
     long long a2 = getChL(block1 << 1, block2 << 1, block3 << 1);
@@ -127,98 +127,98 @@ inline void process_blockL(FILD* fild, int b1, int b2, int b3, int j, int start,
 
     long long change = a1 ^ a2 ^ a3;
 
-    ((long long*)fild->new_state[b2])[j] = ((long long*)fild->state[b2])[j] ^ change;
+    ((long long*)grid->new_state[b2])[j] = ((long long*)grid->state[b2])[j] ^ change;
 
-    process_cell(fild, b2, start);
-    process_cell(fild, b2, end);
+    process_cell(grid, b2, start);
+    process_cell(grid, b2, end);
 }
 
-void nextStepL(FILD* fild)
+void nextStepL(GRID* grid)
 {
-    for (int j = 0; j < fild->size_x / 64; j++)
+    for (int j = 0; j < grid->size_x / 64; j++)
     {
-        process_blockL(fild, fild->size_y - 1, 0, 1, j, j * 64, j * 64 + 63);
+        process_blockL(grid, grid->size_y - 1, 0, 1, j, j * 64, j * 64 + 63);
     }
 
-    for (int i = 1; i < fild->size_y - 1; i++)
+    for (int i = 1; i < grid->size_y - 1; i++)
     {
-        for (int j = 0; j < fild->size_x / 64; j++)
+        for (int j = 0; j < grid->size_x / 64; j++)
         {
-            process_blockL(fild, i - 1, i, i + 1, j, j * 64, j * 64 + 63);
+            process_blockL(grid, i - 1, i, i + 1, j, j * 64, j * 64 + 63);
         }
     }
 
-    for (int j = 0; j < fild->size_x / 64; j++)
+    for (int j = 0; j < grid->size_x / 64; j++)
     {
-        process_blockL(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 64, j * 64 + 63);
+        process_blockL(grid, grid->size_y - 2, grid->size_y - 1, 0, j, j * 64, j * 64 + 63);
     }
 
-    if ((fild->size_x) % 64 != 0)
+    if ((grid->size_x) % 64 != 0)
     {
-        int j = fild->size_x / 64;
-        process_blockL(fild, fild->size_y - 1, 0, 1, j, j * 64, fild->size_x - 1);
-        for (int i = 1; i < fild->size_y - 1; i++)
+        int j = grid->size_x / 64;
+        process_blockL(grid, grid->size_y - 1, 0, 1, j, j * 64, grid->size_x - 1);
+        for (int i = 1; i < grid->size_y - 1; i++)
         {
-            process_blockL(fild, i - 1, i, i + 1, j, j * 64, fild->size_x - 1);
+            process_blockL(grid, i - 1, i, i + 1, j, j * 64, grid->size_x - 1);
         }
-        process_blockL(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 64, fild->size_x - 1);
+        process_blockL(grid, grid->size_y - 2, grid->size_y - 1, 0, j, j * 64, grid->size_x - 1);
     }
 
-    int** tmp = fild->state;
-    (fild->state) = fild->new_state;
-    fild->new_state = tmp;
+    int** tmp = grid->state;
+    (grid->state) = grid->new_state;
+    grid->new_state = tmp;
 }
 
-void nextStepInt(FILD* fild)
+void nextStepInt(GRID* grid)
 {
-    for (int j = 0; j < fild->size_x / 32; j++)
+    for (int j = 0; j < grid->size_x / 32; j++)
     {
-        process_block(fild, fild->size_y - 1, 0, 1, j, j * 32, j * 32 + 31);
+        process_block(grid, grid->size_y - 1, 0, 1, j, j * 32, j * 32 + 31);
     }
 
-    for (int i = 1; i < fild->size_y - 1; i++)
+    for (int i = 1; i < grid->size_y - 1; i++)
     {
-        for (int j = 0; j < fild->size_x / 32; j++)
+        for (int j = 0; j < grid->size_x / 32; j++)
         {
-            process_block(fild, i - 1, i, i + 1, j, j * 32, j * 32 + 31);
+            process_block(grid, i - 1, i, i + 1, j, j * 32, j * 32 + 31);
         }
     }
 
-    for (int j = 0; j < fild->size_x / 32; j++)
+    for (int j = 0; j < grid->size_x / 32; j++)
     {
-        process_block(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 32, j * 32 + 31);
+        process_block(grid, grid->size_y - 2, grid->size_y - 1, 0, j, j * 32, j * 32 + 31);
     }
 
-    if ((fild->size_x) % 32 != 0)
+    if ((grid->size_x) % 32 != 0)
     {
-        int j = fild->size_x / 32;
-        process_block(fild, fild->size_y - 1, 0, 1, j, j * 32, fild->size_x - 1);
-        for (int i = 1; i < fild->size_y - 1; i++)
+        int j = grid->size_x / 32;
+        process_block(grid, grid->size_y - 1, 0, 1, j, j * 32, grid->size_x - 1);
+        for (int i = 1; i < grid->size_y - 1; i++)
         {
-            process_block(fild, i - 1, i, i + 1, j, j * 32, fild->size_x - 1);
+            process_block(grid, i - 1, i, i + 1, j, j * 32, grid->size_x - 1);
         }
-        process_block(fild, fild->size_y - 2, fild->size_y - 1, 0, j, j * 32, fild->size_x - 1);
+        process_block(grid, grid->size_y - 2, grid->size_y - 1, 0, j, j * 32, grid->size_x - 1);
     }
 
-    int** tmp = fild->state;
-    (fild->state) = fild->new_state;
-    fild->new_state = tmp;
+    int** tmp = grid->state;
+    (grid->state) = grid->new_state;
+    grid->new_state = tmp;
 }
 
-int test(FILD* fild1, FILD* fild2, void (*step1) (FILD*), void (*step2) (FILD*), int rounds_count, int align)
+int test(GRID* grid1, GRID* grid2, void (*step1) (GRID*), void (*step2) (GRID*), int rounds_count, int align)
 {
     for (int i = 0; i < rounds_count; i++)
     {
-        step1(fild1);
-        step2(fild2);
-        for (int j = 0; j < fild1->size_y; j++)
+        step1(grid1);
+        step2(grid2);
+        for (int j = 0; j < grid1->size_y; j++)
         {
-            if (memcmp(fild1->state[j], fild2->state[j], (fild1->size_x / align * 8)) != 0)
+            if (memcmp(grid1->state[j], grid2->state[j], (grid1->size_x / align * 8)) != 0)
             {
                 return 0;
             }
-            if (fild1->size_x % align != 0 && ((fild1->state[j][fild1->size_x / align - 1] & ((~((long long)0)) << (align - 1 - fild1->size_x % align)))
-                                               != (fild2->state[j][fild1->size_x / align - 1] & ((~((long long)0)) << (align - 1 - fild1->size_x % align)))))
+            if (grid1->size_x % align != 0 && ((grid1->state[j][grid1->size_x / align - 1] & ((~((long long)0)) << (align - 1 - grid1->size_x % align)))
+                                               != (grid2->state[j][grid1->size_x / align - 1] & ((~((long long)0)) << (align - 1 - grid1->size_x % align)))))
             {
                 return 0;
             }
